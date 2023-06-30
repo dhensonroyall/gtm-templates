@@ -1,0 +1,55 @@
+/** EDIT THIS */
+const release = {
+  name: 'Feature Name' ,
+  folder_url: 'https://drive.google.com/drive/folders/####' , // destination folder for GTM files
+  persona: 'Persona Title' // null if you want to skip
+};
+/** OK STOP */
+
+function copyFiles() {
+  const folderId = release.folder_url.split('/')[5];
+  const releaseFolder = DriveApp.getFolderById(folderId);
+  const templateFolder = DriveApp.getFolderById('####'); // Drive folder where you house your templates
+  const files = templateFolder.getFiles();
+  
+  do {
+    let file = files.next();
+    let name = file.getName();
+    if (name.startsWith('[Template]')) {
+      let newName = name.replace('[Template]',release.name);
+      let newFile = file.makeCopy(newName,releaseFolder);
+      replaceNames(newFile);
+      console.log(`"${newName}" created`);
+    };
+  } while (files.hasNext());
+}
+
+function replaceNames(file) {
+  const type = file.getMimeType();
+  if (type != 'application/vnd.google-apps.document') { return };
+
+  const id = file.getId();
+  const doc = DocumentApp.openById(id);
+  const body = doc.getBody();
+  const text = body.getText();
+
+  body.replaceText('\\[Feature\\]',release.name);
+  if (release.persona) {
+    body.replaceText('\\[Persona\\]',release.persona)
+  }  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
